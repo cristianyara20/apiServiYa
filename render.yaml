@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: api-serviya-reportes
+    runtime: go
+    buildCommand: go build -o api ./cmd/api
+    startCommand: ./api
+    envVars:
+      - key: GIN_MODE
+        value: release
+      - key: DATABASE_URL
+        value: postgresql://postgres:Cristianvargas2007%23@db.lvxhporsajorgckeisna.supabase.co:5432/postgres?sslmode=require

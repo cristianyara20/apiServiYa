@@ -1,0 +1,260 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API de Reportes generada con Onion Architecture, Unit of Work y Repository Pattern",
+        "title": "API REST ServiYa (Reportes)",
+        "contact": {},
+        "version": "2.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/api/v1",
+    "paths": {
+        "/reportes/actividad-usuarios": {
+            "get": {
+                "description": "Devuelve cuántos usuarios nuevos se registraron y cuántos usuarios activos (con al menos una reserva) hubo en el mes",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reportes"
+                ],
+                "summary": "Obtiene la actividad de usuarios del mes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mes (1-12)",
+                        "name": "mes",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Año (ej. 2026)",
+                        "name": "anio",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ActividadUsuariosDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reportes/admin": {
+            "get": {
+                "description": "Devuelve el top de prestadores, cantidad de pqrs abiertas y estadísticas de reservas para un mes y año",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reportes"
+                ],
+                "summary": "Obtiene un reporte consolidado para el administrador",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mes (1-12)",
+                        "name": "mes",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Año (ej. 2026)",
+                        "name": "anio",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ReporteConsolidadoMensualDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reportes/servicios-populares": {
+            "get": {
+                "description": "Devuelve los 10 servicios con más reservas en el mes y año indicados, incluyendo nombre y categoría",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reportes"
+                ],
+                "summary": "Obtiene los servicios más solicitados del mes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mes (1-12)",
+                        "name": "mes",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Año (ej. 2026)",
+                        "name": "anio",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.ServicioPopularDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.ActividadUsuariosDTO": {
+            "type": "object",
+            "properties": {
+                "anio": {
+                    "type": "integer"
+                },
+                "mes": {
+                    "type": "integer"
+                },
+                "usuarios_activos": {
+                    "type": "integer"
+                },
+                "usuarios_nuevos": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.PrestadorTopDTO": {
+            "type": "object",
+            "properties": {
+                "calificacion": {
+                    "type": "number"
+                },
+                "correo_prestador": {
+                    "type": "string"
+                },
+                "id_prestador": {
+                    "type": "integer"
+                },
+                "nombre_prestador": {
+                    "type": "string"
+                },
+                "total_servicios": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.ReporteConsolidadoMensualDTO": {
+            "type": "object",
+            "properties": {
+                "anio": {
+                    "type": "integer"
+                },
+                "mes": {
+                    "type": "integer"
+                },
+                "pqrs_abiertas": {
+                    "type": "integer"
+                },
+                "top_prestadores": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.PrestadorTopDTO"
+                    }
+                },
+                "total_canceladas": {
+                    "type": "integer"
+                },
+                "total_completadas": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.ServicioPopularDTO": {
+            "type": "object",
+            "properties": {
+                "categoria": {
+                    "type": "string"
+                },
+                "id_servicio": {
+                    "type": "integer"
+                },
+                "nombre_servicio": {
+                    "type": "string"
+                },
+                "veces_solicitado": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

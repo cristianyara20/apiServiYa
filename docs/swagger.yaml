@@ -1,0 +1,176 @@
+basePath: /api/v1
+definitions:
+  domain.ActividadUsuariosDTO:
+    properties:
+      anio:
+        type: integer
+      mes:
+        type: integer
+      usuarios_activos:
+        type: integer
+      usuarios_nuevos:
+        type: integer
+    type: object
+  domain.PrestadorTopDTO:
+    properties:
+      calificacion:
+        type: number
+      correo_prestador:
+        type: string
+      id_prestador:
+        type: integer
+      nombre_prestador:
+        type: string
+      total_servicios:
+        type: integer
+    type: object
+  domain.ReporteConsolidadoMensualDTO:
+    properties:
+      anio:
+        type: integer
+      mes:
+        type: integer
+      pqrs_abiertas:
+        type: integer
+      top_prestadores:
+        items:
+          $ref: '#/definitions/domain.PrestadorTopDTO'
+        type: array
+      total_canceladas:
+        type: integer
+      total_completadas:
+        type: integer
+    type: object
+  domain.ServicioPopularDTO:
+    properties:
+      categoria:
+        type: string
+      id_servicio:
+        type: integer
+      nombre_servicio:
+        type: string
+      veces_solicitado:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API de Reportes generada con Onion Architecture, Unit of Work y Repository
+    Pattern
+  title: API REST ServiYa (Reportes)
+  version: "2.0"
+paths:
+  /reportes/actividad-usuarios:
+    get:
+      description: Devuelve cuántos usuarios nuevos se registraron y cuántos usuarios
+        activos (con al menos una reserva) hubo en el mes
+      parameters:
+      - description: Mes (1-12)
+        in: query
+        name: mes
+        required: true
+        type: integer
+      - description: Año (ej. 2026)
+        in: query
+        name: anio
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ActividadUsuariosDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtiene la actividad de usuarios del mes
+      tags:
+      - reportes
+  /reportes/admin:
+    get:
+      description: Devuelve el top de prestadores, cantidad de pqrs abiertas y estadísticas
+        de reservas para un mes y año
+      parameters:
+      - description: Mes (1-12)
+        in: query
+        name: mes
+        required: true
+        type: integer
+      - description: Año (ej. 2026)
+        in: query
+        name: anio
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.ReporteConsolidadoMensualDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtiene un reporte consolidado para el administrador
+      tags:
+      - reportes
+  /reportes/servicios-populares:
+    get:
+      description: Devuelve los 10 servicios con más reservas en el mes y año indicados,
+        incluyendo nombre y categoría
+      parameters:
+      - description: Mes (1-12)
+        in: query
+        name: mes
+        required: true
+        type: integer
+      - description: Año (ej. 2026)
+        in: query
+        name: anio
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.ServicioPopularDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Obtiene los servicios más solicitados del mes
+      tags:
+      - reportes
+swagger: "2.0"
