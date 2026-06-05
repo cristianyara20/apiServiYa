@@ -3,11 +3,13 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"apiServiYa/internal/application/reportes"
 	"apiServiYa/internal/infrastructure/repository"
 	presentation_http "apiServiYa/internal/presentation/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -15,7 +17,7 @@ import (
 	// Swagger
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	_ "apiServiYa/docs"
+	"apiServiYa/docs"
 )
 
 // @title API REST ServiYa (Reportes)
@@ -24,6 +26,15 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
+	// Configurar Swagger dinámicamente según el entorno
+	if os.Getenv("PORT") != "" {
+		docs.SwaggerInfo.Host = ""
+		docs.SwaggerInfo.Schemes = []string{"https", "http"}
+	} else {
+		docs.SwaggerInfo.Host = "localhost:8080"
+		docs.SwaggerInfo.Schemes = []string{"http", "https"}
+	}
+
 	// 1. Conexión a la Base de Datos (Supabase)
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
@@ -52,20 +63,15 @@ func main() {
 	// 5. Configuración de Gin Router
 	router := gin.Default()
 
-	// Middleware de CORS
-	router.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-
-		c.Next()
-	})
+	// Middleware de CORS (gin-contrib/cors)
+	router.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With", "Cache-Control"},
+		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
+		AllowCredentials: false,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Endpoints de Reportes
 	api := router.Group("/api/v1")
@@ -93,3 +99,4 @@ func main() {
 		log.Fatal("Error al iniciar el servidor:", err)
 	}
 }
+
