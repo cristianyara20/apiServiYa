@@ -1,0 +1,19 @@
+# Archivos de entorno (NUNCA subir credenciales)
+.env
+.env.local
+.env.production
+
+# Binarios compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Directorios de test
+/tmp
+/vendor
+
+# IDE
+.vscode/
+.idea/

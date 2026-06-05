@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
@@ -26,8 +27,13 @@ import (
 // @host localhost:8080
 // @BasePath /api/v1
 func main() {
+	// Cargar variables de entorno desde .env (solo en local, en Render no existe y eso está bien)
+	if err := godotenv.Load(); err != nil {
+		log.Println("ℹ️ No se encontró archivo .env, usando variables de entorno del sistema")
+	}
+
 	// Configurar Swagger dinámicamente según el entorno
-	if os.Getenv("PORT") != "" {
+	if os.Getenv("RENDER") != "" || os.Getenv("PORT") != "" {
 		docs.SwaggerInfo.Host = ""
 		docs.SwaggerInfo.Schemes = []string{"https", "http"}
 	} else {
@@ -38,7 +44,7 @@ func main() {
 	// 1. Conexión a la Base de Datos (Supabase)
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		dsn = "postgresql://postgres:Cristianvargas2007%23@db.lvxhporsajorgckeisna.supabase.co:5432/postgres?sslmode=require"
+		log.Fatal("❌ DATABASE_URL no está configurada. Agrega un archivo .env o configura la variable de entorno.")
 	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
