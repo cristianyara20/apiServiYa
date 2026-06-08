@@ -95,12 +95,24 @@ func main() {
 		c.Redirect(301, "/swagger/index.html")
 	})
 
+	// Endpoint raíz para verificar que la API está corriendo
+	router.GET("/", func(c *gin.Context) {
+		c.String(200, "API DE SERVIYA CORRIENDO EN LENGIAJE GO CON ORM GORM")
+	})
+
 	// 6. Arrancar servidor leyendo puerto dinámico (requerido por Render)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	log.Println("🚀 Servidor corriendo en el puerto " + port)
+	
+	log.Println("=========================================================")
+	log.Println("🚀 API REST ServiYa iniciada correctamente")
+	log.Println("=========================================================")
+	log.Printf("📖 Documentación:   http://localhost:%s/docs\n", port)
+	log.Printf("🌐 Estado API:      http://localhost:%s/\n", port)
+	log.Println("=========================================================")
+
 	if err := router.Run(":" + port); err != nil {
 		log.Fatal("Error al iniciar el servidor:", err)
 	}
