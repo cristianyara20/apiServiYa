@@ -5,9 +5,11 @@ import (
 	"os"
 	"time"
 
+	"apiServiYa/internal/application/auth"
 	"apiServiYa/internal/application/reportes"
 	"apiServiYa/internal/infrastructure/repository"
 	presentation_http "apiServiYa/internal/presentation/http"
+	"apiServiYa/internal/presentation/http/middleware"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -26,6 +28,9 @@ import (
 // @description API de Reportes generada con Onion Architecture, Unit of Work y Repository Pattern
 // @host localhost:8080
 // @BasePath /api/v1
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func main() {
 	// Cargar variables de entorno desde .env (solo en local, en Render no existe y eso está bien)
 	if err := godotenv.Load(); err != nil {
@@ -53,11 +58,13 @@ func main() {
 
 	// 2. Inicialización de Repositorios e Infraestructura
 	reporteUoW := repository.NewReporteUnitOfWork(db)
+	authRepo := repository.NewAuthRepository(db)
 
 	// 3. Inicialización de Casos de Uso (Capa de Aplicación)
 	reporteAdminUseCase := reportes.NewGenerarReporteConsolidadoUseCase(reporteUoW)
 	serviciosPopularesUseCase := reportes.NewObtenerServiciosPopularesUseCase(reporteUoW)
 	actividadUsuariosUseCase := reportes.NewObtenerActividadUsuariosUseCase(reporteUoW)
+	loginUseCase := auth.NewLoginUseCase(authRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
@@ -65,26 +72,35 @@ func main() {
 		serviciosPopularesUseCase,
 		actividadUsuariosUseCase,
 	)
+	authController := presentation_http.NewAuthController(loginUseCase)
 
 	// 5. Configuración de Gin Router
 	router := gin.Default()
 
 	// Middleware de CORS (gin-contrib/cors)
 	router.Use(cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With", "Cache-Control"},
-		ExposeHeaders:    []string{"Content-Length", "Content-Type"},
-		AllowCredentials: false,
+		AllowOrigins:     []string{"http://localhost:3000", "https://tu-dominio-vercel.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Endpoints de Reportes
-	api := router.Group("/api/v1")
+	// Endpoints Públicos (Autenticación)
+	authGroup := router.Group("/api/v1/auth")
 	{
-		api.GET("/reportes/admin", reportesController.ObtenerReporteAdmin)
-		api.GET("/reportes/servicios-populares", reportesController.ObtenerServiciosPopulares)
-		api.GET("/reportes/actividad-usuarios", reportesController.ObtenerActividadUsuarios)
+		authGroup.POST("/login", authController.Login)
+	}
+
+	// Endpoints Protegidos (Reportes)
+	reportesGroup := router.Group("/api/v1/reportes")
+	reportesGroup.Use(middleware.AuthMiddleware())
+	{
+		reportesGroup.GET("/admin", reportesController.ObtenerReporteAdmin)
+		reportesGroup.GET("/admin/pdf", reportesController.DescargarReporteAdminPDF)
+		reportesGroup.GET("/servicios-populares", reportesController.ObtenerServiciosPopulares)
+		reportesGroup.GET("/actividad-usuarios", reportesController.ObtenerActividadUsuarios)
 	}
 
 	// Ruta de Swagger UI
@@ -111,6 +127,7 @@ func main() {
 	log.Println("=========================================================")
 	log.Printf("📖 Documentación:   http://localhost:%s/docs\n", port)
 	log.Printf("🌐 Estado API:      http://localhost:%s/\n", port)
+	log.Printf("📄 Descargar PDF:   http://localhost:%s/api/v1/reportes/admin/pdf?mes=6&anio=2026\n", port)
 	log.Println("=========================================================")
 
 	if err := router.Run(":" + port); err != nil {

@@ -9,8 +9,83 @@
     "host": "localhost:8080",
     "basePath": "/api/v1",
     "paths": {
+        "/auth/login": {
+            "post": {
+                "description": "Inicia sesión en Supabase y devuelve un JWT si el usuario es un administrador",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "autenticacion"
+                ],
+                "summary": "Iniciar sesión como administrador",
+                "parameters": [
+                    {
+                        "description": "Credenciales del administrador",
+                        "name": "credenciales",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.LoginRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.LoginResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/reportes/actividad-usuarios": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Devuelve cuántos usuarios nuevos se registraron y cuántos usuarios activos (con al menos una reserva) hubo en el mes",
                 "produces": [
                     "application/json"
@@ -51,6 +126,15 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -65,6 +149,11 @@
         },
         "/reportes/admin": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Devuelve el top de prestadores, cantidad de pqrs abiertas y estadísticas de reservas para un mes y año",
                 "produces": [
                     "application/json"
@@ -105,6 +194,83 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/reportes/admin/pdf": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Genera y devuelve un documento PDF con los datos de administrador, actividad y servicios",
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "reportes"
+                ],
+                "summary": "Descarga el reporte general en PDF",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Mes (1-12)",
+                        "name": "mes",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Año (ej. 2026)",
+                        "name": "anio",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "reporte.pdf",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -119,6 +285,11 @@
         },
         "/reportes/servicios-populares": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Devuelve los 10 servicios con más reservas en el mes y año indicados, incluyendo nombre y categoría",
                 "produces": [
                     "application/json"
@@ -162,6 +333,15 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -190,6 +370,35 @@
                 },
                 "usuarios_nuevos": {
                     "type": "integer"
+                }
+            }
+        },
+        "domain.LoginRequestDTO": {
+            "type": "object",
+            "required": [
+                "correo",
+                "password"
+            ],
+            "properties": {
+                "correo": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.LoginResponseDTO": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "integer"
+                },
+                "token_type": {
+                    "type": "string"
                 }
             }
         },
@@ -231,10 +440,19 @@
                         "$ref": "#/definitions/domain.PrestadorTopDTO"
                     }
                 },
+                "total_aceptadas": {
+                    "type": "integer"
+                },
                 "total_canceladas": {
                     "type": "integer"
                 },
                 "total_completadas": {
+                    "type": "integer"
+                },
+                "total_pendientes": {
+                    "type": "integer"
+                },
+                "total_reservas": {
                     "type": "integer"
                 }
             }
@@ -255,6 +473,13 @@
                     "type": "integer"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

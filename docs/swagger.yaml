@@ -11,6 +11,25 @@ definitions:
       usuarios_nuevos:
         type: integer
     type: object
+  domain.LoginRequestDTO:
+    properties:
+      correo:
+        type: string
+      password:
+        type: string
+    required:
+    - correo
+    - password
+    type: object
+  domain.LoginResponseDTO:
+    properties:
+      access_token:
+        type: string
+      expires_in:
+        type: integer
+      token_type:
+        type: string
+    type: object
   domain.PrestadorTopDTO:
     properties:
       calificacion:
@@ -36,9 +55,15 @@ definitions:
         items:
           $ref: '#/definitions/domain.PrestadorTopDTO'
         type: array
+      total_aceptadas:
+        type: integer
       total_canceladas:
         type: integer
       total_completadas:
+        type: integer
+      total_pendientes:
+        type: integer
+      total_reservas:
         type: integer
     type: object
   domain.ServicioPopularDTO:
@@ -60,6 +85,53 @@ info:
   title: API REST ServiYa (Reportes)
   version: "2.0"
 paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Inicia sesión en Supabase y devuelve un JWT si el usuario es un
+        administrador
+      parameters:
+      - description: Credenciales del administrador
+        in: body
+        name: credenciales
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.LoginResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar sesión como administrador
+      tags:
+      - autenticacion
   /reportes/actividad-usuarios:
     get:
       description: Devuelve cuántos usuarios nuevos se registraron y cuántos usuarios
@@ -88,12 +160,20 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Obtiene la actividad de usuarios del mes
       tags:
       - reportes
@@ -125,13 +205,66 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Obtiene un reporte consolidado para el administrador
+      tags:
+      - reportes
+  /reportes/admin/pdf:
+    get:
+      description: Genera y devuelve un documento PDF con los datos de administrador,
+        actividad y servicios
+      parameters:
+      - description: Mes (1-12)
+        in: query
+        name: mes
+        required: true
+        type: integer
+      - description: Año (ej. 2026)
+        in: query
+        name: anio
+        required: true
+        type: integer
+      produces:
+      - application/pdf
+      responses:
+        "200":
+          description: reporte.pdf
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Descarga el reporte general en PDF
       tags:
       - reportes
   /reportes/servicios-populares:
@@ -164,13 +297,26 @@ paths:
             additionalProperties:
               type: string
             type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
             additionalProperties:
               type: string
             type: object
+      security:
+      - BearerAuth: []
       summary: Obtiene los servicios más solicitados del mes
       tags:
       - reportes
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
