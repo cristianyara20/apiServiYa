@@ -55,16 +55,18 @@ func main() {
 	if err != nil {
 		log.Println("⚠️ Advertencia: No se pudo conectar a la base de datos (ignora esto si es prueba de compilación)")
 	}
-
 	// 2. Inicialización de Repositorios e Infraestructura
 	reporteUoW := repository.NewReporteUnitOfWork(db)
 	authRepo := repository.NewAuthRepository(db)
+	operativoRepo := repository.NewPrestadorOperativoRepository(db)
 
 	// 3. Inicialización de Casos de Uso (Capa de Aplicación)
 	reporteAdminUseCase := reportes.NewGenerarReporteConsolidadoUseCase(reporteUoW)
 	serviciosPopularesUseCase := reportes.NewObtenerServiciosPopularesUseCase(reporteUoW)
 	actividadUsuariosUseCase := reportes.NewObtenerActividadUsuariosUseCase(reporteUoW)
 	loginUseCase := auth.NewLoginUseCase(authRepo)
+	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
+	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
@@ -73,6 +75,10 @@ func main() {
 		actividadUsuariosUseCase,
 	)
 	authController := presentation_http.NewAuthController(loginUseCase)
+	operativoController := presentation_http.NewOperativoController(
+		prestadoresOperativosUseCase,
+		historialServiciosUseCase,
+	)
 
 	// 5. Configuración de Gin Router
 	router := gin.Default()
@@ -93,14 +99,19 @@ func main() {
 		authGroup.POST("/login", authController.Login)
 	}
 
-	// Endpoints Protegidos (Reportes)
-	reportesGroup := router.Group("/api/v1/reportes")
-	reportesGroup.Use(middleware.AuthMiddleware())
+	// Endpoints Protegidos (Reportes y Operativo)
+	apiGroup := router.Group("/api/v1")
+	apiGroup.Use(middleware.AuthMiddleware())
 	{
-		reportesGroup.GET("/admin", reportesController.ObtenerReporteAdmin)
-		reportesGroup.GET("/admin/pdf", reportesController.DescargarReporteAdminPDF)
-		reportesGroup.GET("/servicios-populares", reportesController.ObtenerServiciosPopulares)
-		reportesGroup.GET("/actividad-usuarios", reportesController.ObtenerActividadUsuarios)
+		apiGroup.GET("/reportes/admin", reportesController.ObtenerReporteAdmin)
+		apiGroup.GET("/reportes/admin/pdf", reportesController.DescargarReporteAdminPDF)
+		apiGroup.GET("/reportes/servicios-populares", reportesController.ObtenerServiciosPopulares)
+		apiGroup.GET("/reportes/actividad-usuarios", reportesController.ObtenerActividadUsuarios)
+
+		// Nuevos endpoints operativos
+		apiGroup.GET("/operativo/prestadores", operativoController.ObtenerPrestadores)
+		apiGroup.GET("/operativo/historial-servicios", operativoController.ObtenerHistorialServicios)
+		apiGroup.POST("/operativo/notificar-aceptacion", operativoController.InformarAceptacion)
 	}
 
 	// Ruta de Swagger UI

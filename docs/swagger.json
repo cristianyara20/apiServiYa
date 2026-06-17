@@ -79,6 +79,158 @@
                 }
             }
         },
+        "/operativo/historial-servicios": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Devuelve todas las reservas del sistema incluyendo los nombres de cliente, servicio, fecha agendada, dirección y estado del servicio.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Obtiene el historial completo de servicios/reservas prestadas en la plataforma",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.ReservaHistorialDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operativo/notificar-aceptacion": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Endpoint que simula o registra la notificación del prestador al cliente de que se aceptó la reserva. Por ahora retorna un mensaje exitoso de confirmación de notificación.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Informa al cliente que un prestador aceptó su reserva",
+                "parameters": [
+                    {
+                        "description": "Datos de la reserva",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.NotificationRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operativo/prestadores": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Devuelve la lista completa de prestadores de la base de datos, con nombre, correo, experiencia, calificación promedio y estado (disponible, ocupado, inactivo).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Obtiene la lista de prestadores con su estado de disponibilidad en tiempo real",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.PrestadorDetalladoDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/reportes/actividad-usuarios": {
             "get": {
                 "security": [
@@ -402,6 +554,49 @@
                 }
             }
         },
+        "domain.NotificationRequestDTO": {
+            "type": "object",
+            "properties": {
+                "estado_reserva": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_prestador": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.PrestadorDetalladoDTO": {
+            "type": "object",
+            "properties": {
+                "apellido": {
+                    "type": "string"
+                },
+                "calificacion_promedio": {
+                    "type": "number"
+                },
+                "correo": {
+                    "type": "string"
+                },
+                "estado_disponibilidad": {
+                    "type": "string"
+                },
+                "experiencia": {
+                    "type": "string"
+                },
+                "id_prestador": {
+                    "type": "integer"
+                },
+                "nombre": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.PrestadorTopDTO": {
             "type": "object",
             "properties": {
@@ -454,6 +649,38 @@
                 },
                 "total_reservas": {
                     "type": "integer"
+                }
+            }
+        },
+        "domain.ReservaHistorialDTO": {
+            "type": "object",
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "direccion": {
+                    "type": "string"
+                },
+                "estado_reserva": {
+                    "type": "string"
+                },
+                "fecha_agenda": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "id_servicio": {
+                    "type": "integer"
+                },
+                "nombre_cliente": {
+                    "type": "string"
+                },
+                "nombre_servicio": {
+                    "type": "string"
                 }
             }
         },

@@ -30,6 +30,34 @@ definitions:
       token_type:
         type: string
     type: object
+  domain.NotificationRequestDTO:
+    properties:
+      estado_reserva:
+        type: string
+      id_cliente:
+        type: integer
+      id_prestador:
+        type: integer
+      id_reserva:
+        type: integer
+    type: object
+  domain.PrestadorDetalladoDTO:
+    properties:
+      apellido:
+        type: string
+      calificacion_promedio:
+        type: number
+      correo:
+        type: string
+      estado_disponibilidad:
+        type: string
+      experiencia:
+        type: string
+      id_prestador:
+        type: integer
+      nombre:
+        type: string
+    type: object
   domain.PrestadorTopDTO:
     properties:
       calificacion:
@@ -65,6 +93,27 @@ definitions:
         type: integer
       total_reservas:
         type: integer
+    type: object
+  domain.ReservaHistorialDTO:
+    properties:
+      descripcion:
+        type: string
+      direccion:
+        type: string
+      estado_reserva:
+        type: string
+      fecha_agenda:
+        type: string
+      id_cliente:
+        type: integer
+      id_reserva:
+        type: integer
+      id_servicio:
+        type: integer
+      nombre_cliente:
+        type: string
+      nombre_servicio:
+        type: string
     type: object
   domain.ServicioPopularDTO:
     properties:
@@ -132,6 +181,109 @@ paths:
       summary: Iniciar sesión como administrador
       tags:
       - autenticacion
+  /operativo/historial-servicios:
+    get:
+      description: Devuelve todas las reservas del sistema incluyendo los nombres
+        de cliente, servicio, fecha agendada, dirección y estado del servicio.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.ReservaHistorialDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Obtiene el historial completo de servicios/reservas prestadas en la
+        plataforma
+      tags:
+      - operativo
+  /operativo/notificar-aceptacion:
+    post:
+      consumes:
+      - application/json
+      description: Endpoint que simula o registra la notificación del prestador al
+        cliente de que se aceptó la reserva. Por ahora retorna un mensaje exitoso
+        de confirmación de notificación.
+      parameters:
+      - description: Datos de la reserva
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.NotificationRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Informa al cliente que un prestador aceptó su reserva
+      tags:
+      - operativo
+  /operativo/prestadores:
+    get:
+      description: Devuelve la lista completa de prestadores de la base de datos,
+        con nombre, correo, experiencia, calificación promedio y estado (disponible,
+        ocupado, inactivo).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.PrestadorDetalladoDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Obtiene la lista de prestadores con su estado de disponibilidad en
+        tiempo real
+      tags:
+      - operativo
   /reportes/actividad-usuarios:
     get:
       description: Devuelve cuántos usuarios nuevos se registraron y cuántos usuarios
