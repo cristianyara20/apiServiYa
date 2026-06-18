@@ -11,20 +11,23 @@ import (
 )
 
 type ReportesController struct {
-	adminUseCase     *reportes.GenerarReporteConsolidadoUseCase
-	serviciosUseCase *reportes.ObtenerServiciosPopularesUseCase
-	actividadUseCase *reportes.ObtenerActividadUsuariosUseCase
+	adminUseCase        *reportes.GenerarReporteConsolidadoUseCase
+	serviciosUseCase    *reportes.ObtenerServiciosPopularesUseCase
+	actividadUseCase    *reportes.ObtenerActividadUsuariosUseCase
+	calificacionesUseCase *reportes.ObtenerCalificacionesUseCase
 }
 
 func NewReportesController(
 	adminUC *reportes.GenerarReporteConsolidadoUseCase,
 	serviciosUC *reportes.ObtenerServiciosPopularesUseCase,
 	actividadUC *reportes.ObtenerActividadUsuariosUseCase,
+	calificacionesUC *reportes.ObtenerCalificacionesUseCase,
 ) *ReportesController {
 	return &ReportesController{
-		adminUseCase:     adminUC,
-		serviciosUseCase: serviciosUC,
-		actividadUseCase: actividadUC,
+		adminUseCase:        adminUC,
+		serviciosUseCase:    serviciosUC,
+		actividadUseCase:    actividadUC,
+		calificacionesUseCase: calificacionesUC,
 	}
 }
 
@@ -82,6 +85,24 @@ func (ctrl *ReportesController) ObtenerServiciosPopulares(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resultado)
+}
+
+// ObtenerCalificaciones godoc
+// @Summary Obtiene todas las calificaciones/reseñas de los servicios
+// @Description Devuelve un listado completo con los comentarios, puntuaciones, fechas y nombres de los involucrados en cada reserva calificada.
+// @Tags reportes
+// @Produce json
+// @Success 200 {array} domain.CalificacionDTO
+// @Failure 500 {object} map[string]string
+// @Router /reportes/calificaciones [get]
+// @Security BearerAuth
+func (ctrl *ReportesController) ObtenerCalificaciones(c *gin.Context) {
+	resultados, err := ctrl.calificacionesUseCase.Ejecutar(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fallo al obtener las calificaciones", "detalle": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resultados)
 }
 
 // ObtenerActividadUsuarios godoc

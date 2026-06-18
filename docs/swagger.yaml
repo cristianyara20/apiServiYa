@@ -11,6 +11,26 @@ definitions:
       usuarios_nuevos:
         type: integer
     type: object
+  domain.CalificacionDTO:
+    properties:
+      comentario:
+        type: string
+      fecha_calificacion:
+        type: string
+      id_calificacion:
+        type: integer
+      id_reserva:
+        type: integer
+      nombre_cliente:
+        description: Datos extra para hacerlo más rico
+        type: string
+      nombre_prestador:
+        type: string
+      nombre_servicio:
+        type: string
+      puntuacion:
+        type: integer
+    type: object
   domain.CancelarReservaRequestDTO:
     properties:
       id_cliente:
@@ -437,6 +457,30 @@ paths:
       security:
       - BearerAuth: []
       summary: Descarga el reporte general en PDF
+      tags:
+      - reportes
+  /reportes/calificaciones:
+    get:
+      description: Devuelve un listado completo con los comentarios, puntuaciones,
+        fechas y nombres de los involucrados en cada reserva calificada.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.CalificacionDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Obtiene todas las calificaciones/reseñas de los servicios
       tags:
       - reportes
   /reportes/servicios-populares:

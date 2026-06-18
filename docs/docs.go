@@ -441,6 +441,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/reportes/calificaciones": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Devuelve un listado completo con los comentarios, puntuaciones, fechas y nombres de los involucrados en cada reserva calificada.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reportes"
+                ],
+                "summary": "Obtiene todas las calificaciones/reseñas de los servicios",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.CalificacionDTO"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/reportes/servicios-populares": {
             "get": {
                 "security": [
@@ -609,6 +646,36 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "usuarios_nuevos": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.CalificacionDTO": {
+            "type": "object",
+            "properties": {
+                "comentario": {
+                    "type": "string"
+                },
+                "fecha_calificacion": {
+                    "type": "string"
+                },
+                "id_calificacion": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "nombre_cliente": {
+                    "description": "Datos extra para hacerlo más rico",
+                    "type": "string"
+                },
+                "nombre_prestador": {
+                    "type": "string"
+                },
+                "nombre_servicio": {
+                    "type": "string"
+                },
+                "puntuacion": {
                     "type": "integer"
                 }
             }

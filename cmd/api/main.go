@@ -61,6 +61,7 @@ func main() {
 	authRepo := repository.NewAuthRepository(db)
 	operativoRepo := repository.NewPrestadorOperativoRepository(db)
 	reservaOperativaRepo := repository.NewReservaOperativaRepository(db)
+	calificacionRepo := repository.NewCalificacionRepository(db)
 
 	// 3. Inicialización de Casos de Uso (Capa de Aplicación)
 	reporteAdminUseCase := reportes.NewGenerarReporteConsolidadoUseCase(reporteUoW)
@@ -70,12 +71,14 @@ func main() {
 	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
+	calificacionesUseCase := reportes.NewObtenerCalificacionesUseCase(calificacionRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
 		reporteAdminUseCase,
 		serviciosPopularesUseCase,
 		actividadUsuariosUseCase,
+		calificacionesUseCase,
 	)
 	authController := presentation_http.NewAuthController(loginUseCase)
 	operativoController := presentation_http.NewOperativoController(
@@ -111,6 +114,7 @@ func main() {
 		apiGroup.GET("/reportes/admin/pdf", reportesController.DescargarReporteAdminPDF)
 		apiGroup.GET("/reportes/servicios-populares", reportesController.ObtenerServiciosPopulares)
 		apiGroup.GET("/reportes/actividad-usuarios", reportesController.ObtenerActividadUsuarios)
+		apiGroup.GET("/reportes/calificaciones", reportesController.ObtenerCalificaciones)
 
 		// Nuevos endpoints operativos
 		apiGroup.GET("/operativo/prestadores", operativoController.ObtenerPrestadores)
