@@ -7,6 +7,7 @@ import (
 
 	"apiServiYa/internal/application/auth"
 	"apiServiYa/internal/application/reportes"
+	"apiServiYa/internal/application/reservas"
 	"apiServiYa/internal/infrastructure/repository"
 	presentation_http "apiServiYa/internal/presentation/http"
 	"apiServiYa/internal/presentation/http/middleware"
@@ -59,6 +60,7 @@ func main() {
 	reporteUoW := repository.NewReporteUnitOfWork(db)
 	authRepo := repository.NewAuthRepository(db)
 	operativoRepo := repository.NewPrestadorOperativoRepository(db)
+	reservaOperativaRepo := repository.NewReservaOperativaRepository(db)
 
 	// 3. Inicialización de Casos de Uso (Capa de Aplicación)
 	reporteAdminUseCase := reportes.NewGenerarReporteConsolidadoUseCase(reporteUoW)
@@ -67,6 +69,7 @@ func main() {
 	loginUseCase := auth.NewLoginUseCase(authRepo)
 	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
+	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
@@ -79,6 +82,7 @@ func main() {
 		prestadoresOperativosUseCase,
 		historialServiciosUseCase,
 	)
+	reservasController := presentation_http.NewReservasController(cancelarReservaUseCase)
 
 	// 5. Configuración de Gin Router
 	router := gin.Default()
@@ -112,6 +116,9 @@ func main() {
 		apiGroup.GET("/operativo/prestadores", operativoController.ObtenerPrestadores)
 		apiGroup.GET("/operativo/historial-servicios", operativoController.ObtenerHistorialServicios)
 		apiGroup.POST("/operativo/notificar-aceptacion", operativoController.InformarAceptacion)
+
+		// Reservas operativas
+		apiGroup.PUT("/reservas/:id/cancelar", reservasController.CancelarReserva)
 	}
 
 	// Ruta de Swagger UI

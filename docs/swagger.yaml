@@ -11,6 +11,22 @@ definitions:
       usuarios_nuevos:
         type: integer
     type: object
+  domain.CancelarReservaRequestDTO:
+    properties:
+      id_cliente:
+        type: integer
+    required:
+    - id_cliente
+    type: object
+  domain.CancelarReservaResponseDTO:
+    properties:
+      estado_reserva:
+        type: string
+      id_reserva:
+        type: integer
+      mensaje:
+        type: string
+    type: object
   domain.LoginRequestDTO:
     properties:
       correo:
@@ -106,11 +122,15 @@ definitions:
         type: string
       id_cliente:
         type: integer
+      id_prestador:
+        type: integer
       id_reserva:
         type: integer
       id_servicio:
         type: integer
       nombre_cliente:
+        type: string
+      nombre_prestador:
         type: string
       nombre_servicio:
         type: string
@@ -466,6 +486,60 @@ paths:
       summary: Obtiene los servicios más solicitados del mes
       tags:
       - reportes
+  /reservas/{id}/cancelar:
+    put:
+      consumes:
+      - application/json
+      description: Permite a un cliente cancelar una de sus reservas siempre y cuando
+        esté en estado pendiente o aceptada.
+      parameters:
+      - description: ID de la Reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos de cancelación (ID del Cliente)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CancelarReservaRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.CancelarReservaResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Cancela una reserva existente
+      tags:
+      - reservas
 securityDefinitions:
   BearerAuth:
     in: header

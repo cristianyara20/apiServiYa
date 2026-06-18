@@ -511,6 +511,88 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/reservas/{id}/cancelar": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Permite a un cliente cancelar una de sus reservas siempre y cuando esté en estado pendiente o aceptada.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservas"
+                ],
+                "summary": "Cancela una reserva existente",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID de la Reserva",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Datos de cancelación (ID del Cliente)",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CancelarReservaRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.CancelarReservaResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -528,6 +610,31 @@ const docTemplate = `{
                 },
                 "usuarios_nuevos": {
                     "type": "integer"
+                }
+            }
+        },
+        "domain.CancelarReservaRequestDTO": {
+            "type": "object",
+            "required": [
+                "id_cliente"
+            ],
+            "properties": {
+                "id_cliente": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.CancelarReservaResponseDTO": {
+            "type": "object",
+            "properties": {
+                "estado_reserva": {
+                    "type": "string"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "mensaje": {
+                    "type": "string"
                 }
             }
         },
@@ -676,6 +783,9 @@ const docTemplate = `{
                 "id_cliente": {
                     "type": "integer"
                 },
+                "id_prestador": {
+                    "type": "integer"
+                },
                 "id_reserva": {
                     "type": "integer"
                 },
@@ -683,6 +793,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "nombre_cliente": {
+                    "type": "string"
+                },
+                "nombre_prestador": {
                     "type": "string"
                 },
                 "nombre_servicio": {
