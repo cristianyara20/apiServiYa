@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API de Reportes generada con Onion Architecture, Unit of Work y Repository Pattern",
+        "description": "API de Reportes generada con Clean Architecture,",
         "title": "API REST ServiYa (Reportes)",
         "contact": {},
         "version": "2.0"
