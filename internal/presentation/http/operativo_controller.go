@@ -12,15 +12,21 @@ import (
 type OperativoController struct {
 	prestadoresUC *reportes.ObtenerPrestadoresOperativosUseCase
 	historialUC   *reportes.ObtenerHistorialServiciosUseCase
+	pqrsUC        *reportes.ObtenerPqrsUseCase
+	responderUC   *reportes.ResponderPqrUseCase
 }
 
 func NewOperativoController(
 	prestadoresUC *reportes.ObtenerPrestadoresOperativosUseCase,
 	historialUC *reportes.ObtenerHistorialServiciosUseCase,
+	pqrsUC *reportes.ObtenerPqrsUseCase,
+	responderUC *reportes.ResponderPqrUseCase,
 ) *OperativoController {
 	return &OperativoController{
 		prestadoresUC: prestadoresUC,
 		historialUC:   historialUC,
+		pqrsUC:        pqrsUC,
+		responderUC:   responderUC,
 	}
 }
 
@@ -89,6 +95,57 @@ func (ctrl *OperativoController) InformarAceptacion(c *gin.Context) {
 		"id_reserva":  strconvFormat(req.IDReserva),
 		"id_prestador": strconvFormat(req.IDPrestador),
 		"estado":      req.EstadoReserva,
+	})
+}
+
+// ObtenerPqrs godoc
+// @Summary Obtiene todas las PQRs del sistema con el nombre del cliente
+// @Description Devuelve la lista completa de PQRs incluyendo datos del cliente, tipo, estado, descripción, y respuesta del administrador si existe.
+// @Tags operativo
+// @Produce json
+// @Success 200 {array} domain.PqrDTO
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /operativo/pqrs [get]
+// @Security BearerAuth
+func (ctrl *OperativoController) ObtenerPqrs(c *gin.Context) {
+	resultados, err := ctrl.pqrsUC.Ejecutar(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Fallo al obtener PQRs", "detalle": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, resultados)
+}
+
+// ResponderPqr godoc
+// @Summary Permite al administrador responder una PQR
+// @Description Recibe el ID de la PQR y la respuesta del administrador, actualiza el estado a 'Cerrado' y registra la fecha de respuesta.
+// @Tags operativo
+// @Accept json
+// @Produce json
+// @Param body body domain.ResponderPqrRequestDTO true "ID de la PQR y respuesta del admin"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /operativo/pqrs/responder [post]
+// @Security BearerAuth
+func (ctrl *OperativoController) ResponderPqr(c *gin.Context) {
+	var req domain.ResponderPqrRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato de petición inválido", "detalle": err.Error()})
+		return
+	}
+
+	if err := ctrl.responderUC.Ejecutar(c.Request.Context(), req.IDPqr, req.RespuestaAdmin); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "No se pudo responder la PQR", "detalle": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"mensaje": "PQR respondida exitosamente",
+		"id_pqr":  strconvFormat(req.IDPqr),
+		"estado":  "Cerrado",
 	})
 }
 

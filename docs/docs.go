@@ -191,6 +191,121 @@ const docTemplate = `{
                 }
             }
         },
+        "/operativo/pqrs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Devuelve la lista completa de PQRs incluyendo datos del cliente, tipo, estado, descripción, y respuesta del administrador si existe.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Obtiene todas las PQRs del sistema con el nombre del cliente",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.PqrDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/operativo/pqrs/responder": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Recibe el ID de la PQR y la respuesta del administrador, actualiza el estado a 'Cerrado' y registra la fecha de respuesta.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Permite al administrador responder una PQR",
+                "parameters": [
+                    {
+                        "description": "ID de la PQR y respuesta del admin",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.ResponderPqrRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/operativo/prestadores": {
             "get": {
                 "security": [
@@ -751,6 +866,41 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.PqrDTO": {
+            "type": "object",
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "estado_pqr": {
+                    "type": "string"
+                },
+                "fecha_pqr": {
+                    "type": "string"
+                },
+                "fecha_respuesta": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_pqr": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "nombre_cliente": {
+                    "type": "string"
+                },
+                "respuesta_admin": {
+                    "type": "string"
+                },
+                "tipo_pqr": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.PrestadorDetalladoDTO": {
             "type": "object",
             "properties": {
@@ -866,6 +1016,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "nombre_servicio": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ResponderPqrRequestDTO": {
+            "type": "object",
+            "required": [
+                "id_pqr",
+                "respuesta_admin"
+            ],
+            "properties": {
+                "id_pqr": {
+                    "type": "integer"
+                },
+                "respuesta_admin": {
                     "type": "string"
                 }
             }

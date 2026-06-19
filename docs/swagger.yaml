@@ -77,6 +77,29 @@ definitions:
       id_reserva:
         type: integer
     type: object
+  domain.PqrDTO:
+    properties:
+      descripcion:
+        type: string
+      estado_pqr:
+        type: string
+      fecha_pqr:
+        type: string
+      fecha_respuesta:
+        type: string
+      id_cliente:
+        type: integer
+      id_pqr:
+        type: integer
+      id_reserva:
+        type: integer
+      nombre_cliente:
+        type: string
+      respuesta_admin:
+        type: string
+      tipo_pqr:
+        type: string
+    type: object
   domain.PrestadorDetalladoDTO:
     properties:
       apellido:
@@ -155,6 +178,16 @@ definitions:
       nombre_servicio:
         type: string
     type: object
+  domain.ResponderPqrRequestDTO:
+    properties:
+      id_pqr:
+        type: integer
+      respuesta_admin:
+        type: string
+    required:
+    - id_pqr
+    - respuesta_admin
+    type: object
   domain.ServicioPopularDTO:
     properties:
       categoria:
@@ -169,8 +202,8 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: API de Reportes generada con Clean Architecture,
-  
+  description: API de Reportes generada con Onion Architecture, Unit of Work y Repository
+    Pattern
   title: API REST ServiYa (Reportes)
   version: "2.0"
 paths:
@@ -290,6 +323,81 @@ paths:
       security:
       - BearerAuth: []
       summary: Informa al cliente que un prestador aceptó su reserva
+      tags:
+      - operativo
+  /operativo/pqrs:
+    get:
+      description: Devuelve la lista completa de PQRs incluyendo datos del cliente,
+        tipo, estado, descripción, y respuesta del administrador si existe.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.PqrDTO'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Obtiene todas las PQRs del sistema con el nombre del cliente
+      tags:
+      - operativo
+  /operativo/pqrs/responder:
+    post:
+      consumes:
+      - application/json
+      description: Recibe el ID de la PQR y la respuesta del administrador, actualiza
+        el estado a 'Cerrado' y registra la fecha de respuesta.
+      parameters:
+      - description: ID de la PQR y respuesta del admin
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.ResponderPqrRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Permite al administrador responder una PQR
       tags:
       - operativo
   /operativo/prestadores:

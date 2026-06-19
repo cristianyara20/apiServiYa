@@ -37,3 +37,28 @@ type IPrestadorOperativoRepository interface {
 	ObtenerTodosPrestadores(ctx context.Context) ([]PrestadorDetalladoDTO, error)
 	ObtenerHistorialServicios(ctx context.Context) ([]ReservaHistorialDTO, error)
 }
+
+// --- PQR DTOs ---
+
+type PqrDTO struct {
+	IDPqr           uint    `json:"id_pqr"`
+	IDCliente       uint    `json:"id_cliente"`
+	NombreCliente   string  `json:"nombre_cliente"`
+	IDReserva       *uint   `json:"id_reserva"`
+	TipoPqr         string  `json:"tipo_pqr"`
+	Descripcion     string  `json:"descripcion"`
+	EstadoPqr       string  `json:"estado_pqr"`
+	FechaPqr        string  `json:"fecha_pqr"`
+	RespuestaAdmin  *string `json:"respuesta_admin"`
+	FechaRespuesta  *string `json:"fecha_respuesta"`
+}
+
+type ResponderPqrRequestDTO struct {
+	IDPqr          uint   `json:"id_pqr" binding:"required"`
+	RespuestaAdmin string `json:"respuesta_admin" binding:"required"`
+}
+
+type IPqrRepository interface {
+	ObtenerTodasPqrs(ctx context.Context) ([]PqrDTO, error)
+	ResponderPqr(ctx context.Context, idPqr uint, respuesta string) error
+}

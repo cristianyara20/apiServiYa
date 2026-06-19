@@ -62,6 +62,7 @@ func main() {
 	operativoRepo := repository.NewPrestadorOperativoRepository(db)
 	reservaOperativaRepo := repository.NewReservaOperativaRepository(db)
 	calificacionRepo := repository.NewCalificacionRepository(db)
+	pqrRepo := repository.NewPqrRepository(db)
 
 	// 3. Inicialización de Casos de Uso (Capa de Aplicación)
 	reporteAdminUseCase := reportes.NewGenerarReporteConsolidadoUseCase(reporteUoW)
@@ -72,6 +73,8 @@ func main() {
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
 	calificacionesUseCase := reportes.NewObtenerCalificacionesUseCase(calificacionRepo)
+	pqrsUseCase := reportes.NewObtenerPqrsUseCase(pqrRepo)
+	responderPqrUseCase := reportes.NewResponderPqrUseCase(pqrRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
@@ -84,6 +87,8 @@ func main() {
 	operativoController := presentation_http.NewOperativoController(
 		prestadoresOperativosUseCase,
 		historialServiciosUseCase,
+		pqrsUseCase,
+		responderPqrUseCase,
 	)
 	reservasController := presentation_http.NewReservasController(cancelarReservaUseCase)
 
@@ -120,6 +125,10 @@ func main() {
 		apiGroup.GET("/operativo/prestadores", operativoController.ObtenerPrestadores)
 		apiGroup.GET("/operativo/historial-servicios", operativoController.ObtenerHistorialServicios)
 		apiGroup.POST("/operativo/notificar-aceptacion", operativoController.InformarAceptacion)
+
+		// PQRs operativas
+		apiGroup.GET("/operativo/pqrs", operativoController.ObtenerPqrs)
+		apiGroup.POST("/operativo/pqrs/responder", operativoController.ResponderPqr)
 
 		// Reservas operativas
 		apiGroup.PUT("/reservas/:id/cancelar", reservasController.CancelarReserva)
