@@ -169,8 +169,8 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: API de Reportes generada con Onion Architecture, Unit of Work y Repository
-    Pattern
+  description: API de Reportes generada con Clean Architecture,
+  
   title: API REST ServiYa (Reportes)
   version: "2.0"
 paths:
