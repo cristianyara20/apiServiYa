@@ -72,6 +72,7 @@ func main() {
 	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
+	finalizarReservaUseCase := reservas.NewFinalizarReservaUseCase(reservaOperativaRepo)
 	calificacionesUseCase := reportes.NewObtenerCalificacionesUseCase(calificacionRepo)
 	pqrsUseCase := reportes.NewObtenerPqrsUseCase(pqrRepo)
 	responderPqrUseCase := reportes.NewResponderPqrUseCase(pqrRepo)
@@ -89,6 +90,7 @@ func main() {
 		historialServiciosUseCase,
 		pqrsUseCase,
 		responderPqrUseCase,
+		finalizarReservaUseCase,
 	)
 	reservasController := presentation_http.NewReservasController(cancelarReservaUseCase)
 
@@ -132,7 +134,9 @@ func main() {
 
 		// Reservas operativas
 		apiGroup.PUT("/reservas/:id/cancelar", reservasController.CancelarReserva)
+		apiGroup.POST("/operativo/reservas/:id/finalizar", operativoController.FinalizarReserva)
 	}
+
 
 	// Ruta de Swagger UI
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

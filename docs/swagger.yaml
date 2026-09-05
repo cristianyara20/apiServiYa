@@ -47,6 +47,29 @@ definitions:
       mensaje:
         type: string
     type: object
+  domain.FinalizarReservaRequestDTO:
+    properties:
+      detalle:
+        type: string
+      foto_url:
+        type: string
+      id_prestador:
+        type: integer
+    required:
+    - foto_url
+    - id_prestador
+    type: object
+  domain.FinalizarReservaResponseDTO:
+    properties:
+      estado_reserva:
+        type: string
+      foto_url:
+        type: string
+      id_reserva:
+        type: integer
+      mensaje:
+        type: string
+    type: object
   domain.LoginRequestDTO:
     properties:
       correo:
@@ -430,6 +453,54 @@ paths:
       - BearerAuth: []
       summary: Obtiene la lista de prestadores con su estado de disponibilidad en
         tiempo real
+      tags:
+      - operativo
+  /operativo/reservas/{id}/finalizar:
+    post:
+      consumes:
+      - application/json
+      description: Permite al prestador finalizar un servicio en curso enviando la
+        URL de la foto de evidencia.
+      parameters:
+      - description: ID de la Reserva
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos de finalización (id_prestador, foto_url)
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.FinalizarReservaRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.FinalizarReservaResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Finaliza una reserva con foto obligatoria de evidencia
       tags:
       - operativo
   /reportes/actividad-usuarios:

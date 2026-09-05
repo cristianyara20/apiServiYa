@@ -2,6 +2,7 @@ package http
 
 import (
 	"apiServiYa/internal/application/reportes"
+	"apiServiYa/internal/application/reservas"
 	"apiServiYa/internal/domain"
 	"net/http"
 	"strconv"
@@ -10,10 +11,11 @@ import (
 )
 
 type OperativoController struct {
-	prestadoresUC *reportes.ObtenerPrestadoresOperativosUseCase
-	historialUC   *reportes.ObtenerHistorialServiciosUseCase
-	pqrsUC        *reportes.ObtenerPqrsUseCase
-	responderUC   *reportes.ResponderPqrUseCase
+	prestadoresUC      *reportes.ObtenerPrestadoresOperativosUseCase
+	historialUC        *reportes.ObtenerHistorialServiciosUseCase
+	pqrsUC             *reportes.ObtenerPqrsUseCase
+	responderUC        *reportes.ResponderPqrUseCase
+	finalizarReservaUC *reservas.FinalizarReservaUseCase
 }
 
 func NewOperativoController(
@@ -21,14 +23,17 @@ func NewOperativoController(
 	historialUC *reportes.ObtenerHistorialServiciosUseCase,
 	pqrsUC *reportes.ObtenerPqrsUseCase,
 	responderUC *reportes.ResponderPqrUseCase,
+	finalizarReservaUC *reservas.FinalizarReservaUseCase,
 ) *OperativoController {
 	return &OperativoController{
-		prestadoresUC: prestadoresUC,
-		historialUC:   historialUC,
-		pqrsUC:        pqrsUC,
-		responderUC:   responderUC,
+		prestadoresUC:      prestadoresUC,
+		historialUC:        historialUC,
+		pqrsUC:             pqrsUC,
+		responderUC:        responderUC,
+		finalizarReservaUC: finalizarReservaUC,
 	}
 }
+
 
 // ObtenerPrestadores godoc
 // @Summary Obtiene la lista de prestadores con su estado de disponibilidad en tiempo real
@@ -149,6 +154,44 @@ func (ctrl *OperativoController) ResponderPqr(c *gin.Context) {
 	})
 }
 
+// FinalizarReserva godoc
+// @Summary Finaliza una reserva con foto obligatoria de evidencia
+// @Description Permite al prestador finalizar un servicio en curso enviando la URL de la foto de evidencia.
+// @Tags operativo
+// @Accept json
+// @Produce json
+// @Param id path int true "ID de la Reserva"
+// @Param body body domain.FinalizarReservaRequestDTO true "Datos de finalización (id_prestador, foto_url)"
+// @Success 200 {object} domain.FinalizarReservaResponseDTO
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /operativo/reservas/{id}/finalizar [post]
+// @Security BearerAuth
+func (ctrl *OperativoController) FinalizarReserva(c *gin.Context) {
+	idParam := c.Param("id")
+	idReserva, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de reserva inválido"})
+		return
+	}
+
+	var req domain.FinalizarReservaRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cuerpo de la petición inválido o incompleto", "detalle": err.Error()})
+		return
+	}
+
+	res, err := ctrl.finalizarReservaUC.Ejecutar(c.Request.Context(), uint(idReserva), req.IDPrestador, req.FotoURL)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Fallo al finalizar reserva", "detalle": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
 func strconvFormat(val uint) string {
 	return strconv.FormatUint(uint64(val), 10)
 }
+
