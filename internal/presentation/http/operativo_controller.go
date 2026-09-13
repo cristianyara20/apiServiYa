@@ -168,7 +168,9 @@ func (ctrl *OperativoController) ResponderPqr(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /operativo/reservas/{id}/finalizar [post]
 // @Security BearerAuth
+// FinalizarReserva recibe la solicitud del Frontend Flutter para completar un servicio con evidencia fotográfica.
 func (ctrl *OperativoController) FinalizarReserva(c *gin.Context) {
+	// 1. Extrae el parámetro :id de la URL
 	idParam := c.Param("id")
 	idReserva, err := strconv.ParseUint(idParam, 10, 32)
 	if err != nil {
@@ -176,18 +178,21 @@ func (ctrl *OperativoController) FinalizarReserva(c *gin.Context) {
 		return
 	}
 
+	// 2. Mapea y valida el JSON recibido del Frontend hacia un DTO
 	var req domain.FinalizarReservaRequestDTO
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Cuerpo de la petición inválido o incompleto", "detalle": err.Error()})
 		return
 	}
 
+	// 3. Invoca la lógica de negocio en Clean Architecture (Caso de Uso)
 	res, err := ctrl.finalizarReservaUC.Ejecutar(c.Request.Context(), uint(idReserva), req.IDPrestador, req.FotoURL)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Fallo al finalizar reserva", "detalle": err.Error()})
 		return
 	}
 
+	// 4. Retorna respuesta HTTP 200 OK con el DTO serializado al Frontend
 	c.JSON(http.StatusOK, res)
 }
 
