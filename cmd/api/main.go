@@ -69,6 +69,7 @@ func main() {
 	serviciosPopularesUseCase := reportes.NewObtenerServiciosPopularesUseCase(reporteUoW)
 	actividadUsuariosUseCase := reportes.NewObtenerActividadUsuariosUseCase(reporteUoW)
 	loginUseCase := auth.NewLoginUseCase(authRepo)
+	registerUseCase := auth.NewRegisterUseCase(authRepo)
 	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
@@ -84,7 +85,7 @@ func main() {
 		actividadUsuariosUseCase,
 		calificacionesUseCase,
 	)
-	authController := presentation_http.NewAuthController(loginUseCase)
+	authController := presentation_http.NewAuthController(loginUseCase, registerUseCase)
 	operativoController := presentation_http.NewOperativoController(
 		prestadoresOperativosUseCase,
 		historialServiciosUseCase,
@@ -111,6 +112,7 @@ func main() {
 	authGroup := router.Group("/api/v1/auth")
 	{
 		authGroup.POST("/login", authController.Login)
+		authGroup.POST("/register", authController.Register)
 	}
 
 	// Endpoints Protegidos (Reportes y Operativo)

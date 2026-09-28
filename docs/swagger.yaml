@@ -153,6 +153,36 @@ definitions:
       total_servicios:
         type: integer
     type: object
+  domain.RegisterRequestDTO:
+    properties:
+      apellido:
+        type: string
+      correo:
+        type: string
+      fecha_nacimiento:
+        type: string
+      nombre:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      rol:
+        type: string
+    required:
+    - apellido
+    - correo
+    - nombre
+    - password
+    type: object
+  domain.RegisterResponseDTO:
+    properties:
+      auth_id:
+        type: string
+      correo:
+        type: string
+      mensaje:
+        type: string
+    type: object
   domain.ReporteConsolidadoMensualDTO:
     properties:
       anio:
@@ -275,6 +305,47 @@ paths:
               type: string
             type: object
       summary: Iniciar sesión como administrador
+      tags:
+      - autenticacion
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Registra un nuevo usuario en Supabase Auth y crea su perfil en
+        la base de datos
+      parameters:
+      - description: Datos de registro del usuario
+        in: body
+        name: datos
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.RegisterResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Registrar un nuevo usuario
       tags:
       - autenticacion
   /operativo/historial-servicios:
