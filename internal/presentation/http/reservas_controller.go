@@ -10,11 +10,44 @@ import (
 )
 
 type ReservasController struct {
+	crearUC    *reservas.CrearReservaUseCase
 	cancelarUC *reservas.CancelarReservaUseCase
 }
 
-func NewReservasController(cancelarUC *reservas.CancelarReservaUseCase) *ReservasController {
-	return &ReservasController{cancelarUC: cancelarUC}
+func NewReservasController(crearUC *reservas.CrearReservaUseCase, cancelarUC *reservas.CancelarReservaUseCase) *ReservasController {
+	return &ReservasController{
+		crearUC:    crearUC,
+		cancelarUC: cancelarUC,
+	}
+}
+
+// CrearReserva godoc
+// @Summary Crea una nueva reserva
+// @Description Permite a un cliente registrar una nueva reserva de servicio.
+// @Tags reservas
+// @Accept json
+// @Produce json
+// @Param body body domain.CrearReservaRequestDTO true "Datos para la creación de la reserva"
+// @Success 201 {object} domain.Reserva
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /reservas [post]
+// @Security BearerAuth
+func (ctrl *ReservasController) CrearReserva(c *gin.Context) {
+	var req domain.CrearReservaRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Cuerpo de la petición inválido o incompleto", "detalle": err.Error()})
+		return
+	}
+
+	res, err := ctrl.crearUC.Ejecutar(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, res)
 }
 
 // CancelarReserva godoc

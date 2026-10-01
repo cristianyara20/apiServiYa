@@ -792,6 +792,72 @@
                 }
             }
         },
+        "/reservas": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Permite a un cliente registrar una nueva reserva de servicio.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "reservas"
+                ],
+                "summary": "Crea una nueva reserva",
+                "parameters": [
+                    {
+                        "description": "Datos para la creación de la reserva",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CrearReservaRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Reserva"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/reservas/{id}/cancelar": {
             "put": {
                 "security": [
@@ -945,6 +1011,36 @@
                 },
                 "mensaje": {
                     "type": "string"
+                }
+            }
+        },
+        "domain.CrearReservaRequestDTO": {
+            "type": "object",
+            "required": [
+                "descripcion",
+                "direccion",
+                "fecha_agenda",
+                "id_cliente",
+                "id_servicio"
+            ],
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "direccion": {
+                    "type": "string"
+                },
+                "fecha_agenda": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_prestador": {
+                    "type": "integer"
+                },
+                "id_servicio": {
+                    "type": "integer"
                 }
             }
         },
@@ -1185,6 +1281,38 @@
                     "type": "integer"
                 },
                 "total_reservas": {
+                    "type": "integer"
+                }
+            }
+        },
+        "domain.Reserva": {
+            "type": "object",
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "detalle_extra": {
+                    "type": "string"
+                },
+                "direccion": {
+                    "type": "string"
+                },
+                "estado_reserva": {
+                    "type": "string"
+                },
+                "fecha_agenda": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_prestador": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "id_servicio": {
                     "type": "integer"
                 }
             }

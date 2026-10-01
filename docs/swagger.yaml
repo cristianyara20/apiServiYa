@@ -47,6 +47,27 @@ definitions:
       mensaje:
         type: string
     type: object
+  domain.CrearReservaRequestDTO:
+    properties:
+      descripcion:
+        type: string
+      direccion:
+        type: string
+      fecha_agenda:
+        type: string
+      id_cliente:
+        type: integer
+      id_prestador:
+        type: integer
+      id_servicio:
+        type: integer
+    required:
+    - descripcion
+    - direccion
+    - fecha_agenda
+    - id_cliente
+    - id_servicio
+    type: object
   domain.FinalizarReservaRequestDTO:
     properties:
       detalle:
@@ -204,6 +225,27 @@ definitions:
       total_pendientes:
         type: integer
       total_reservas:
+        type: integer
+    type: object
+  domain.Reserva:
+    properties:
+      descripcion:
+        type: string
+      detalle_extra:
+        type: string
+      direccion:
+        type: string
+      estado_reserva:
+        type: string
+      fecha_agenda:
+        type: string
+      id_cliente:
+        type: integer
+      id_prestador:
+        type: integer
+      id_reserva:
+        type: integer
+      id_servicio:
         type: integer
     type: object
   domain.ReservaHistorialDTO:
@@ -780,6 +822,48 @@ paths:
       summary: Obtiene los servicios más solicitados del mes
       tags:
       - reportes
+  /reservas:
+    post:
+      consumes:
+      - application/json
+      description: Permite a un cliente registrar una nueva reserva de servicio.
+      parameters:
+      - description: Datos para la creación de la reserva
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CrearReservaRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.Reserva'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Crea una nueva reserva
+      tags:
+      - reservas
   /reservas/{id}/cancelar:
     put:
       consumes:

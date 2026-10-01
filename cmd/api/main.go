@@ -73,6 +73,7 @@ func main() {
 	prestadoresOperativosUseCase := reportes.NewObtenerPrestadoresOperativosUseCase(operativoRepo)
 	historialServiciosUseCase := reportes.NewObtenerHistorialServiciosUseCase(operativoRepo)
 	cancelarReservaUseCase := reservas.NewCancelarReservaUseCase(reservaOperativaRepo)
+	crearReservaUseCase := reservas.NewCrearReservaUseCase(reservaOperativaRepo)
 	finalizarReservaUseCase := reservas.NewFinalizarReservaUseCase(reservaOperativaRepo)
 	calificacionesUseCase := reportes.NewObtenerCalificacionesUseCase(calificacionRepo)
 	pqrsUseCase := reportes.NewObtenerPqrsUseCase(pqrRepo)
@@ -93,7 +94,7 @@ func main() {
 		responderPqrUseCase,
 		finalizarReservaUseCase,
 	)
-	reservasController := presentation_http.NewReservasController(cancelarReservaUseCase)
+	reservasController := presentation_http.NewReservasController(crearReservaUseCase, cancelarReservaUseCase)
 
 	// 5. Configuración de Gin Router
 	router := gin.Default()
@@ -135,6 +136,7 @@ func main() {
 		apiGroup.POST("/operativo/pqrs/responder", operativoController.ResponderPqr)
 
 		// Reservas operativas
+		apiGroup.POST("/reservas", reservasController.CrearReserva)
 		apiGroup.PUT("/reservas/:id/cancelar", reservasController.CancelarReserva)
 		apiGroup.POST("/operativo/reservas/:id/finalizar", operativoController.FinalizarReserva)
 	}

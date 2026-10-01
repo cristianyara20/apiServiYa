@@ -15,6 +15,17 @@ func NewReservaOperativaRepository(db *gorm.DB) domain.IReservaOperativaReposito
 	return &ReservaOperativaRepository{db: db}
 }
 
+func (r *ReservaOperativaRepository) CrearReserva(ctx context.Context, reserva *domain.Reserva) (*domain.Reserva, error) {
+	if reserva.EstadoReserva == "" {
+		reserva.EstadoReserva = "pendiente"
+	}
+	err := r.db.WithContext(ctx).Table("gestion.reservas").Create(reserva).Error
+	if err != nil {
+		return nil, err
+	}
+	return reserva, nil
+}
+
 func (r *ReservaOperativaRepository) CancelarReserva(ctx context.Context, idReserva uint, idCliente uint) error {
 	// Verificar que la reserva exista, pertenezca al cliente y esté en estado cancelable
 	var estado string
