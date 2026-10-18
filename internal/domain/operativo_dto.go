@@ -58,7 +58,26 @@ type ResponderPqrRequestDTO struct {
 	RespuestaAdmin string `json:"respuesta_admin" binding:"required"`
 }
 
+type CrearPqrRequestDTO struct {
+	IDCliente   uint   `json:"id_cliente" binding:"required"`
+	IDReserva   uint   `json:"id_reserva" binding:"required"`
+	TipoPqr     string `json:"tipo_pqr" binding:"required"`
+	Descripcion string `json:"descripcion" binding:"required"`
+}
+
+type CrearPqrResponseDTO struct {
+	IDPqr       uint   `json:"id_pqr"`
+	IDCliente   uint   `json:"id_cliente"`
+	IDReserva   uint   `json:"id_reserva"`
+	TipoPqr     string `json:"tipo_pqr"`
+	Descripcion string `json:"descripcion"`
+	EstadoPqr   string `json:"estado_pqr"`
+	Mensaje     string `json:"mensaje"`
+}
+
 type IPqrRepository interface {
 	ObtenerTodasPqrs(ctx context.Context) ([]PqrDTO, error)
 	ResponderPqr(ctx context.Context, idPqr uint, respuesta string) error
+	CrearPqr(ctx context.Context, req *CrearPqrRequestDTO) (*CrearPqrResponseDTO, error)
 }
+

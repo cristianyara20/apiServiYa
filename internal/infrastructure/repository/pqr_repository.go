@@ -50,3 +50,27 @@ func (r *PqrRepository) ResponderPqr(ctx context.Context, idPqr uint, respuesta 
 	`
 	return r.db.WithContext(ctx).Exec(query, respuesta, time.Now(), idPqr).Error
 }
+
+func (r *PqrRepository) CrearPqr(ctx context.Context, req *domain.CrearPqrRequestDTO) (*domain.CrearPqrResponseDTO, error) {
+	var idPqr uint
+	query := `
+		INSERT INTO soporte.pqrs (id_cliente, id_reserva, tipo_pqr, descripcion, estado_pqr)
+		VALUES (?, ?, ?, ?, 'Abierto')
+		RETURNING id_pqr
+	`
+	err := r.db.WithContext(ctx).Raw(query, req.IDCliente, req.IDReserva, req.TipoPqr, req.Descripcion).Scan(&idPqr).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.CrearPqrResponseDTO{
+		IDPqr:       idPqr,
+		IDCliente:   req.IDCliente,
+		IDReserva:   req.IDReserva,
+		TipoPqr:     req.TipoPqr,
+		Descripcion: req.Descripcion,
+		EstadoPqr:   "Abierto",
+		Mensaje:     "PQR radicada exitosamente",
+	}, nil
+}
+

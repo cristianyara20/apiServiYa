@@ -15,6 +15,7 @@ type OperativoController struct {
 	historialUC        *reportes.ObtenerHistorialServiciosUseCase
 	pqrsUC             *reportes.ObtenerPqrsUseCase
 	responderUC        *reportes.ResponderPqrUseCase
+	crearPqrUC         *reportes.CrearPqrUseCase
 	finalizarReservaUC *reservas.FinalizarReservaUseCase
 }
 
@@ -23,6 +24,7 @@ func NewOperativoController(
 	historialUC *reportes.ObtenerHistorialServiciosUseCase,
 	pqrsUC *reportes.ObtenerPqrsUseCase,
 	responderUC *reportes.ResponderPqrUseCase,
+	crearPqrUC *reportes.CrearPqrUseCase,
 	finalizarReservaUC *reservas.FinalizarReservaUseCase,
 ) *OperativoController {
 	return &OperativoController{
@@ -30,6 +32,7 @@ func NewOperativoController(
 		historialUC:        historialUC,
 		pqrsUC:             pqrsUC,
 		responderUC:        responderUC,
+		crearPqrUC:         crearPqrUC,
 		finalizarReservaUC: finalizarReservaUC,
 	}
 }
@@ -152,6 +155,35 @@ func (ctrl *OperativoController) ResponderPqr(c *gin.Context) {
 		"id_pqr":  strconvFormat(req.IDPqr),
 		"estado":  "Cerrado",
 	})
+}
+
+// CrearPqr godoc
+// @Summary Radica una nueva PQR en el sistema
+// @Description Permite a un cliente registrar una PQR asociada a una reserva de servicio
+// @Tags operativo
+// @Accept json
+// @Produce json
+// @Param body body domain.CrearPqrRequestDTO true "Datos de la PQR a registrar"
+// @Success 201 {object} domain.CrearPqrResponseDTO
+// @Failure 400 {object} map[string]string
+// @Failure 401 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /operativo/pqrs [post]
+// @Security BearerAuth
+func (ctrl *OperativoController) CrearPqr(c *gin.Context) {
+	var req domain.CrearPqrRequestDTO
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Formato de petición inválido", "detalle": err.Error()})
+		return
+	}
+
+	res, err := ctrl.crearPqrUC.Ejecutar(c.Request.Context(), req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Fallo al crear PQR", "detalle": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, res)
 }
 
 // FinalizarReserva godoc

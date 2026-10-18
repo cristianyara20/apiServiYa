@@ -78,6 +78,7 @@ func main() {
 	calificacionesUseCase := reportes.NewObtenerCalificacionesUseCase(calificacionRepo)
 	pqrsUseCase := reportes.NewObtenerPqrsUseCase(pqrRepo)
 	responderPqrUseCase := reportes.NewResponderPqrUseCase(pqrRepo)
+	crearPqrUseCase := reportes.NewCrearPqrUseCase(pqrRepo)
 
 	// 4. Inicialización de Controladores (Capa de Presentación)
 	reportesController := presentation_http.NewReportesController(
@@ -92,6 +93,7 @@ func main() {
 		historialServiciosUseCase,
 		pqrsUseCase,
 		responderPqrUseCase,
+		crearPqrUseCase,
 		finalizarReservaUseCase,
 	)
 	reservasController := presentation_http.NewReservasController(crearReservaUseCase, cancelarReservaUseCase)
@@ -133,7 +135,11 @@ func main() {
 
 		// PQRs operativas
 		apiGroup.GET("/operativo/pqrs", operativoController.ObtenerPqrs)
+		apiGroup.POST("/operativo/pqrs", operativoController.CrearPqr)
 		apiGroup.POST("/operativo/pqrs/responder", operativoController.ResponderPqr)
+
+		// Alias directo de PQRs para clientes
+		apiGroup.POST("/pqrs", operativoController.CrearPqr)
 
 		// Reservas operativas
 		apiGroup.POST("/reservas", reservasController.CrearReserva)

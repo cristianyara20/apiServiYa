@@ -296,6 +296,70 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Permite a un cliente registrar una PQR asociada a una reserva de servicio",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "operativo"
+                ],
+                "summary": "Radica una nueva PQR en el sistema",
+                "parameters": [
+                    {
+                        "description": "Datos de la PQR a registrar",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.CrearPqrRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.CrearPqrResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
             }
         },
         "/operativo/pqrs/responder": {
@@ -1016,6 +1080,55 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "mensaje": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CrearPqrRequestDTO": {
+            "type": "object",
+            "required": [
+                "descripcion",
+                "id_cliente",
+                "id_reserva",
+                "tipo_pqr"
+            ],
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "tipo_pqr": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.CrearPqrResponseDTO": {
+            "type": "object",
+            "properties": {
+                "descripcion": {
+                    "type": "string"
+                },
+                "estado_pqr": {
+                    "type": "string"
+                },
+                "id_cliente": {
+                    "type": "integer"
+                },
+                "id_pqr": {
+                    "type": "integer"
+                },
+                "id_reserva": {
+                    "type": "integer"
+                },
+                "mensaje": {
+                    "type": "string"
+                },
+                "tipo_pqr": {
                     "type": "string"
                 }
             }

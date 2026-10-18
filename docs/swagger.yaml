@@ -47,6 +47,39 @@ definitions:
       mensaje:
         type: string
     type: object
+  domain.CrearPqrRequestDTO:
+    properties:
+      descripcion:
+        type: string
+      id_cliente:
+        type: integer
+      id_reserva:
+        type: integer
+      tipo_pqr:
+        type: string
+    required:
+    - descripcion
+    - id_cliente
+    - id_reserva
+    - tipo_pqr
+    type: object
+  domain.CrearPqrResponseDTO:
+    properties:
+      descripcion:
+        type: string
+      estado_pqr:
+        type: string
+      id_cliente:
+        type: integer
+      id_pqr:
+        type: integer
+      id_reserva:
+        type: integer
+      mensaje:
+        type: string
+      tipo_pqr:
+        type: string
+    type: object
   domain.CrearReservaRequestDTO:
     properties:
       descripcion:
@@ -489,6 +522,48 @@ paths:
       security:
       - BearerAuth: []
       summary: Obtiene todas las PQRs del sistema con el nombre del cliente
+      tags:
+      - operativo
+    post:
+      consumes:
+      - application/json
+      description: Permite a un cliente registrar una PQR asociada a una reserva de
+        servicio
+      parameters:
+      - description: Datos de la PQR a registrar
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CrearPqrRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.CrearPqrResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Radica una nueva PQR en el sistema
       tags:
       - operativo
   /operativo/pqrs/responder:
